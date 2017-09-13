@@ -37,6 +37,9 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="toolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -55,7 +58,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProject">
@@ -88,6 +91,10 @@
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionstart">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../../usr/share/icons/ubuntu-mobile/actions/scalable/media-playback-start.svg</normaloff>../../../../../../usr/share/icons/ubuntu-mobile/actions/scalable/media-playback-start.svg</iconset>
+   </property>
    <property name="text">
     <string>Start</string>
    </property>
@@ -95,6 +102,10 @@
   <action name="actionstop">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../../usr/share/icons/ubuntu-mobile/actions/scalable/media-playback-pause.svg</normaloff>../../../../../../usr/share/icons/ubuntu-mobile/actions/scalable/media-playback-pause.svg</iconset>
    </property>
    <property name="text">
     <string>Stop</string>

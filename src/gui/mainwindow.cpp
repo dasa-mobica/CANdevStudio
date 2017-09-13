@@ -14,6 +14,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QVBoxLayout>
+#include <QRadioButton>
 
 #include <cassert> // assert
 #include <iostream>
@@ -224,32 +225,49 @@ struct ModelToolButton : public QToolButton {
 
     static QString mimeDataKey() { return QStringLiteral("application/x-qtnodeeditor"); }
 
+
     void mousePressEvent(QMouseEvent* event) override
     {
         cds_debug("mousePressEvent");
-        QPoint hotSpot = event->pos();
 
-        QMimeData* mimeData = new QMimeData;
-        mimeData->setData(ModelToolButton::mimeDataKey(), text().toUtf8());
+//        QPoint hotSpot = event->pos();
 
-        qreal dpr = window()->windowHandle()->devicePixelRatio();
-        QPixmap pixmap(this->size() * dpr);
-        pixmap.setDevicePixelRatio(dpr);
-        this->render(&pixmap);
+//        QMimeData* mimeData = new QMimeData;
+//        mimeData->setData(ModelToolButton::mimeDataKey(), text().toUtf8());
 
-        QDrag* drag = new QDrag(this);
-        drag->setMimeData(mimeData);
-        drag->setPixmap(pixmap);
-        drag->setHotSpot(hotSpot);
-        Qt::DropAction action = drag->exec(Qt::CopyAction);
+//        qreal dpr = window()->windowHandle()->devicePixelRatio();
+//        QPixmap pixmap(this->size() * dpr);
+//        pixmap.setDevicePixelRatio(dpr);
+//        this->render(&pixmap);
 
-        if (Qt::IgnoreAction == action) {
-            cds_debug("Drag and drop ignored. Act as if clicked");
-            emit pressed();
-        } else {
-            event->accept();
-        }
+//        QDrag* drag = new QDrag(this);
+//        drag->setMimeData(mimeData);
+//        drag->setPixmap(pixmap);
+//        drag->setHotSpot(hotSpot);
+        //Qt::DropAction action = drag->exec(Qt::CopyAction);
+
+//        if (drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction) == Qt::MoveAction) {
+//            //child->close();
+//        } else {
+//            //child->show();
+//            //child->setPixmap(pixmap);
+//        }
+
+//        if (Qt::IgnoreAction == action) {
+//            cds_debug("Drag and drop ignored. Act as if clicked");
+//            std::cout << "dupa 1" << std::endl;
+//        } else {
+//            event->accept();
+//        }
+
+        QToolButton::mousePressEvent(event);
     }
+
+};
+struct ModelButtonGroup : public QButtonGroup {
+    ModelButtonGroup(QWidget* parent = nullptr)
+        : QButtonGroup(parent){}
+
 };
 
 struct FlowViewWrapper : public QtNodes::FlowView {
@@ -263,7 +281,7 @@ struct FlowViewWrapper : public QtNodes::FlowView {
     void dropEvent(QDropEvent* event) override
     {
         cds_debug("DropEvent");
-
+std::cout << "dupa 12" << std::endl;
         const QMimeData* mime = event->mimeData();
         QByteArray data = mime->data(ModelToolButton::mimeDataKey());
 
@@ -280,7 +298,7 @@ struct FlowViewWrapper : public QtNodes::FlowView {
     void dragMoveEvent(QDragMoveEvent* event) override
     {
         QtNodes::FlowView::dragMoveEvent(event);
-
+std::cout << "dupa 13" << std::endl;
         const QMimeData* mime = event->mimeData();
         QByteArray data = mime->data(ModelToolButton::mimeDataKey());
 
@@ -289,11 +307,18 @@ struct FlowViewWrapper : public QtNodes::FlowView {
         }
     }
 
+    /*
+    void mousePressEvent(QMouseEvent* event) override
+    {
+        std::cout << "hahahah" << std::endl;
+    }
+    */
+
     void addNode(const QString& modelName, const QPoint& pos)
     {
         cds_debug("Adding node: {}", modelName.toStdString());
         auto type = _scene->registry().create(modelName);
-
+std::cout << "dupa 14" << std::endl;
         if (type) {
             auto& node = _scene->createNode(std::move(type));
             node.nodeGraphicsObject().setPos(mapToScene(pos));
@@ -312,21 +337,53 @@ void MainWindow::setupMdiArea()
     graphView->setAcceptDrops(true);
     auto flowView = new FlowViewWrapper(graphScene.get());
     auto layout = new QHBoxLayout();
+
+//    auto button1 = new QToolButton();
+//    auto button2 = new QToolButton();
+//    auto button3 = new QToolButton();
+    auto buttonN = new ModelToolButton();
+    auto button1 = new ModelToolButton();
+    auto button2 = new ModelToolButton();
+    auto button3 = new ModelToolButton();
+
+    buttonN->setToolTip("Arrow");
+    buttonN->setAcceptDrops(false);
+    buttonN->setIcon(QIcon("../resources/icons/external-link.svg"));
+    buttonN->setCheckable(true);
+    buttonN->setChecked(true);
+
+    button1->setText("CanDeviceModel");
+    button1->setToolTip("CanDeviceModel");
+    button1->setIcon(QIcon("../resources/icons/settings.svg"));
+    button1->setCheckable(true);
+
+
+    button2->setText("CanRawSenderModel");
+    button2->setToolTip("CanRawSenderModel");
+    button2->setIcon(QIcon("../resources/icons/email.svg"));
+    button2->setCheckable(true);
+
+    button3->setText("CanRawViewModel");
+    button3->setToolTip("CanRawViewModel ");
+    button3->setIcon(QIcon("../resources/icons/share.svg"));
+    button3->setCheckable(true);
+
+    auto group = new ModelButtonGroup();
+    group->addButton(buttonN);
+    group->addButton(button1);
+    group->addButton(button2);
+    group->addButton(button3);
+    group->setExclusive(true);
+
     auto toolbar = new QToolBar();
     toolbar->setOrientation(Qt::Vertical);
+    toolbar->addWidget(buttonN);
+    toolbar->addWidget(button1);
+    toolbar->addWidget(button2);
+    toolbar->addWidget(button3);
 
-    auto button = new ModelToolButton;
-    button->setText("CanDeviceModel");
-    connect(button, &ModelToolButton::pressed, [=]() { flowView->addNode(button->text(), QPoint()); });
-    toolbar->addWidget(button);
-
-    button = new ModelToolButton;
-    button->setText("CanRawViewModel");
-    connect(button, &ModelToolButton::pressed, [=]() { flowView->addNode(button->text(), QPoint()); });
-    toolbar->addWidget(button);
-
-    layout->addWidget(toolbar);
-    layout->addWidget(flowView);
+    layout->addWidget(toolbar);     // ikonki po lewej
+    layout->addWidget(flowView);    // siatka
     graphView->setLayout(layout);
     graphView->setWindowTitle("Project Configuration");
     ui->mdiArea->addSubWindow(graphView);

@@ -1,0 +1,17 @@
+3rdParty/spdlog/bench
+3rdParty/spdlog/bench/latency
+3rdParty/spdlog/example
+3rdParty/spdlog/include/spdlog
+3rdParty/spdlog/include/spdlog/details
+3rdParty/spdlog/include/spdlog/fmt
+3rdParty/spdlog/include/spdlog/fmt/bundled
+3rdParty/spdlog/include/spdlog/sinks
+3rdParty/spdlog/tests
+build/src/components
+build/src/gui
+src/common
+src/common/datamodeltypes
+src/components/candevice
+src/components/canrawsender
+src/components/canrawview
+src/gui
