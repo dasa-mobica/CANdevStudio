@@ -1,4 +1,5 @@
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QStandardItemModel>
 #include <canrawsender.h>
 #include <context.h>
@@ -83,7 +84,7 @@ TEST_CASE("Add and remove frame test", "[canrawsender]")
     CHECK(canRawSender.getLineCount() == 0);
 }
 
-TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
+fakeit::Mock<CRSGuiInterface> getCrsMock()
 {
     using namespace fakeit;
 
@@ -96,6 +97,13 @@ TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
     Fake(Method(crsMock, initTableView));
     Fake(Method(crsMock, getSelectedRows));
     Fake(Method(crsMock, setIndexWidget));
+    return crsMock;
+}
+
+TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
 
     Mock<NLMFactoryInterface> nlmFactoryMock;
     Fake(Dtor(nlmFactoryMock));
@@ -124,4 +132,17 @@ TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
     CHECK(sortIter.value().type() == QJsonValue::Object);
     const auto sortObj = json["sorting"].toObject();
     CHECK(sortObj.contains("currentIndex") == true);
+}
+
+TEST_CASE("CanRawSender, setConfig test", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    canRawSender.setConfig(QJsonObject());
+    CHECK(canRawSender.getConfig().isEmpty() == false);
 }
