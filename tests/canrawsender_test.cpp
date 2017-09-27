@@ -8,6 +8,23 @@
 #include <memory>
 #include <newlinemanager.h>
 
+namespace {
+fakeit::Mock<CRSGuiInterface> getCrsMock()
+{
+    using namespace fakeit;
+
+    Mock<CRSGuiInterface> crsMock;
+    Fake(Dtor(crsMock));
+    Fake(Method(crsMock, setAddCbk));
+    Fake(Method(crsMock, setRemoveCbk));
+    Fake(Method(crsMock, setDockUndockCbk));
+    Fake(Method(crsMock, mainWidget));
+    Fake(Method(crsMock, initTableView));
+    Fake(Method(crsMock, getSelectedRows));
+    Fake(Method(crsMock, setIndexWidget));
+    return crsMock;
+}
+}
 TEST_CASE("Add and remove frame test", "[canrawsender]")
 {
     class helpTestClass {
@@ -34,8 +51,6 @@ TEST_CASE("Add and remove frame test", "[canrawsender]")
     using namespace fakeit;
     CRSGuiInterface::add_t addLineCbk;
     CRSGuiInterface::remove_t removeLineCbk;
-
-    Mock<CRSGuiInterface> crsMock;
 
     Mock<CheckBoxInterface> nlmCheckBoxMock;
     Mock<LineEditInterface> nlmLineEditMock;
@@ -66,14 +81,10 @@ TEST_CASE("Add and remove frame test", "[canrawsender]")
     When(Method(nlmPushButtonMock, mainWidget)).Return(reinterpret_cast<QWidget*>(&nlmPushButtonMock.get()));
     When(Method(nlmFactoryMock, createPushButton)).Return(&nlmPushButtonMock.get());
 
-    Fake(Dtor(crsMock));
+    auto crsMock = getCrsMock();
     When(Method(crsMock, setAddCbk)).Do([&](auto&& fn) { addLineCbk = fn; });
     When(Method(crsMock, setRemoveCbk)).Do([&](auto&& fn) { removeLineCbk = fn; });
-    Fake(Method(crsMock, setDockUndockCbk));
-    Fake(Method(crsMock, mainWidget));
-    Fake(Method(crsMock, initTableView));
     When(Method(crsMock, getSelectedRows)).Do([&]() { return mHelp.getList(); });
-    Fake(Method(crsMock, setIndexWidget));
 
     CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
 
@@ -82,22 +93,6 @@ TEST_CASE("Add and remove frame test", "[canrawsender]")
     CHECK(canRawSender.getLineCount() == 1);
     removeLineCbk();
     CHECK(canRawSender.getLineCount() == 0);
-}
-
-fakeit::Mock<CRSGuiInterface> getCrsMock()
-{
-    using namespace fakeit;
-
-    Mock<CRSGuiInterface> crsMock;
-    Fake(Dtor(crsMock));
-    Fake(Method(crsMock, setAddCbk));
-    Fake(Method(crsMock, setRemoveCbk));
-    Fake(Method(crsMock, setDockUndockCbk));
-    Fake(Method(crsMock, mainWidget));
-    Fake(Method(crsMock, initTableView));
-    Fake(Method(crsMock, getSelectedRows));
-    Fake(Method(crsMock, setIndexWidget));
-    return crsMock;
 }
 
 TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
