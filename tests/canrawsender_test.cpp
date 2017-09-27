@@ -1,5 +1,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QByteArray>
 #include <QStandardItemModel>
 #include <canrawsender.h>
 #include <context.h>
@@ -25,6 +26,7 @@ fakeit::Mock<CRSGuiInterface> getCrsMock()
     return crsMock;
 }
 }
+
 TEST_CASE("Add and remove frame test", "[canrawsender]")
 {
     class helpTestClass {
@@ -129,15 +131,115 @@ TEST_CASE("Can raw sender save configuration test", "[newlinemanager]")
     CHECK(sortObj.contains("currentIndex") == true);
 }
 
-TEST_CASE("CanRawSender, setConfig test", "[CanRawSender]")
+TEST_CASE("CanRawSender, columnAdopt, Columns item not found it", "[CanRawSender]")
 {
     using namespace fakeit;
     auto crsMock = getCrsMock();
-
     Mock<NLMFactoryInterface> nlmFactoryMock;
     Fake(Dtor(nlmFactoryMock));
 
     CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
-    canRawSender.setConfig(QJsonObject());
-    CHECK(canRawSender.getConfig().isEmpty() == false);
+     
+    CHECK(canRawSender.setConfig(QJsonObject()) == false);
+}
+
+TEST_CASE("CanRawSender, columnAdopt, Columns format is different then array", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonValue());
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+
+TEST_CASE("CanRawSender, columnAdopt, Columns array size must be 5", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray());
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, columnAdopt, Columns array does not contain Id field", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"IdWrong", "Data", "Loop", "Interval", ""});
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, columnAdopt, Columns array does not contain Data field", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "DataWrong", "Loop", "Interval", ""});
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+
+TEST_CASE("CanRawSender, columnAdopt, Columns array does not contain Loop field", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "LoopWrong", "Interval", ""});
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+
+TEST_CASE("CanRawSender, columnAdopt, Columns array does not contain Interval field", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "IntervalWrong", ""});
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, contentAdopt, content item not found", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+
+    CHECK(canRawSender.setConfig(jsonObject) == false);
 }

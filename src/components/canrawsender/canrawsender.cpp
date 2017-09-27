@@ -40,10 +40,10 @@ int CanRawSender::getLineCount() const
     return d_ptr->getLineCount();
 }
 
-void CanRawSender::setConfig(const QJsonObject& json)
+bool CanRawSender::setConfig(const QJsonObject& json)
 {
     assert(d_ptr != nullptr);
-    d_ptr->restoreConfiguration(json);
+    return d_ptr->restoreConfiguration(json);
 }
 
 QJsonObject CanRawSender::getConfig() const
