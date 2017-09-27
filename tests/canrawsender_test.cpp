@@ -157,7 +157,6 @@ TEST_CASE("CanRawSender, columnAdopt, Columns format is different then array", "
     CHECK(canRawSender.setConfig(jsonObject) == false);
 }
 
-
 TEST_CASE("CanRawSender, columnAdopt, Columns array size must be 5", "[CanRawSender]")
 {
     using namespace fakeit;
@@ -230,6 +229,7 @@ TEST_CASE("CanRawSender, columnAdopt, Columns array does not contain Interval fi
     CHECK(canRawSender.setConfig(jsonObject) == false);
 }
 
+
 TEST_CASE("CanRawSender, contentAdopt, content item not found", "[CanRawSender]")
 {
     using namespace fakeit;
@@ -242,4 +242,93 @@ TEST_CASE("CanRawSender, contentAdopt, content item not found", "[CanRawSender]"
     jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
 
     CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, contentAdopt, content format is different than array", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonValue());
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+
+TEST_CASE("CanRawSender, contentAdopt, sorting item not found", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonArray());
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, sortingAdopt, sorting format is different then object", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonArray());
+    jsonObject.insert("sorting", QJsonValue());
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, sortingAdopt, object count is different than 1", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonArray());
+    jsonObject.insert("sorting", QJsonObject());
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, sortingAdopt, sorting object does not contain currentIndex", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonArray());
+    jsonObject.insert("sorting", QJsonObject{{"", QJsonValue()}});
+    CHECK(canRawSender.setConfig(jsonObject) == false);
+}
+
+TEST_CASE("CanRawSender, setConfig, successfull validation", "[CanRawSender]")
+{
+    using namespace fakeit;
+    auto crsMock = getCrsMock();
+    Mock<NLMFactoryInterface> nlmFactoryMock;
+    Fake(Dtor(nlmFactoryMock));
+
+    CanRawSender canRawSender{ CanRawSenderCtx(&crsMock.get(), &nlmFactoryMock.get()) };
+    auto jsonObject = QJsonObject();
+    jsonObject.insert("columns", QJsonArray{"Id", "Data", "Loop", "Interval", ""});
+    jsonObject.insert("content", QJsonArray());
+    jsonObject.insert("sorting", QJsonObject{{"currentIndex", QJsonValue(1)}});
+    CHECK(canRawSender.setConfig(jsonObject) == true);
 }
